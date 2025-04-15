@@ -1,0 +1,47 @@
+services:
+  # Serviço PHP
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel
+    volumes:
+      - .:/var/www/html
+    user: "1000:1000"
+    networks:
+      - laravel_network
+
+  # Serviço MySQL (Desenvolvimento)
+  mysql:
+    image: mysql:8.0
+    container_name: laravel_mysql
+    environment:
+      MYSQL_DATABASE: test_devs_uefs
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: test_devs_uefs
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laravel_network
+
+  # Serviço Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - laravel_network
+
+volumes:
+  mysql_data:
+  mysql_test_data:
+
+networks:
+  laravel_network:
