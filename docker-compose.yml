@@ -7,6 +7,7 @@ services:
     container_name: laravel
     volumes:
       - .:/var/www/html
+      - psysh_config:/var/www/.config/psysh 
     user: "1000:1000"
     networks:
       - laravel_network
@@ -42,6 +43,7 @@ services:
 volumes:
   mysql_data:
   mysql_test_data:
+  psysh_config: 
 
 networks:
   laravel_network:

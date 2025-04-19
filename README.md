@@ -65,3 +65,17 @@ Se aprovado, entraremos em contato para a entrevista técnica.
 Se não aprovado, forneceremos um retorno com os principais pontos de melhoria observados.
 Boa sorte!
 Equipe de Desenvolvimento NETRA – Projeto UEFS
+
+## DOCKER
+# principais comando para rodar a aplicação
+
+
+## TESTS
+# Limpa o banco de dados de teste
+php artisan db:wipe --env=testing
+
+# Executa as migrações no ambiente de teste
+php artisan migrate --env=testing
+
+# Popula o banco de dados com dados iniciais usando seeders
+php artisan db:seed --env=testing

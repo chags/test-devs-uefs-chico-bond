@@ -17,6 +17,7 @@ class TagController extends Controller
      *     summary="Lista todas as tags",
      *     description="Retorna uma lista paginada de todas as tags cadastradas no sistema.",
      *     tags={"Tags"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
@@ -37,6 +38,13 @@ class TagController extends Controller
      *         @OA\JsonContent(
      *             type="array",
      *             @OA\Items(ref="#/components/schemas/Tag")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
      *         )
      *     ),
      *     @OA\Response(
@@ -70,6 +78,7 @@ class TagController extends Controller
      *     summary="Exibe detalhes de uma tag específica",
      *     description="Retorna os detalhes de uma tag com base no ID fornecido.",
      *     tags={"Tags"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -81,6 +90,13 @@ class TagController extends Controller
      *         response=200,
      *         description="Detalhes da tag retornados com sucesso",
      *         @OA\JsonContent(ref="#/components/schemas/Tag")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=404,
@@ -115,6 +131,7 @@ class TagController extends Controller
      *     summary="Cria uma nova tag",
      *     description="Cria uma nova tag no sistema com os dados fornecidos.",
      *     tags={"Tags"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -126,6 +143,13 @@ class TagController extends Controller
      *         response=201,
      *         description="Tag criada com sucesso",
      *         @OA\JsonContent(ref="#/components/schemas/Tag")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=422,
@@ -140,7 +164,6 @@ class TagController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction(); // Inicia uma transação
-
         try {
             // Validação dos dados
             $validated = $request->validate([
@@ -157,7 +180,6 @@ class TagController extends Controller
             ]);
 
             Log::info('Tag criada com sucesso.', ['tag_id' => $tag->id]);
-
             DB::commit(); // Confirma a transação
 
             // Retorna a tag criada com status 201
@@ -179,6 +201,7 @@ class TagController extends Controller
      *     summary="Atualiza uma tag existente",
      *     description="Atualiza os dados de uma tag existente com base no ID fornecido.",
      *     tags={"Tags"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -199,6 +222,13 @@ class TagController extends Controller
      *         @OA\JsonContent(ref="#/components/schemas/Tag")
      *     ),
      *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
+     *         )
+     *     ),
+     *     @OA\Response(
      *         response=404,
      *         description="Tag não encontrada",
      *         @OA\JsonContent(
@@ -210,7 +240,6 @@ class TagController extends Controller
     public function update($id, Request $request)
     {
         DB::beginTransaction(); // Inicia uma transação
-
         try {
             // Busca a tag pelo ID no banco de dados
             $tag = Tag::findOrFail($id);
@@ -230,7 +259,6 @@ class TagController extends Controller
             ]);
 
             Log::info('Tag atualizada com sucesso.', ['tag_id' => $tag->id]);
-
             DB::commit(); // Confirma a transação
 
             // Retorna a tag atualizada
@@ -255,6 +283,7 @@ class TagController extends Controller
      *     summary="Remove uma tag",
      *     description="Remove uma tag existente com base no ID fornecido.",
      *     tags={"Tags"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -265,6 +294,13 @@ class TagController extends Controller
      *     @OA\Response(
      *         response=204,
      *         description="Tag removida com sucesso"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=404,

@@ -46,6 +46,7 @@ return [
                 'annotations' => [
                     base_path('app'),
                     base_path('app/OpenApi'),
+                    base_path('app/OpenApi/Schemas'),                   
                 ],
 
                 
@@ -173,6 +174,11 @@ return [
         */
         'securityDefinitions' => [
             'securitySchemes' => [
+                'BearerAuth' => [
+                    'type' => 'http',
+                    'scheme' => 'bearer',
+                    'bearerFormat' => 'JWT',
+                ],
                 /*
                  * Examples of Security schemes
                  */

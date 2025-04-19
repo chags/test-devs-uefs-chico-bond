@@ -3,7 +3,10 @@ FROM php:8.4-fpm
 
 # Variáveis de ambiente
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
-    APP_ENV=production
+    APP_ENV=production \
+    HOME=/var/www/html \
+    XDG_CONFIG_HOME=/var/www/html/.config \
+    PSYSH_CONFIG_DIR=/var/www/html/.config/psysh
 
 # Instala dependências do sistema
 RUN apt-get update && apt-get install -y \
@@ -28,13 +31,11 @@ RUN apt-get update && apt-get install -y \
         gd \
         zip
 
-# Instala Composer globalmente
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
 # Cria diretórios com permissões corretas
 RUN mkdir -p /var/www/html/storage/framework/{sessions,views,cache} \
     && mkdir -p /var/www/html/bootstrap/cache \
-    && chown -R www-data:www-data /var/www/html
+    && mkdir -p $XDG_CONFIG_HOME/psysh \
+    && chown -R www-data:www-data /var/www/html $XDG_CONFIG_HOME
 
 # Define o diretório de trabalho
 WORKDIR /var/www/html
@@ -42,8 +43,12 @@ WORKDIR /var/www/html
 # Copia o código do Laravel para dentro do container
 COPY . .
 
-# Instala dependências do Laravel (modo produção)
-RUN composer install --optimize-autoloader --no-dev
+
+# Instala dependências do Laravel (modo produção) apenas se 'vendor' não existir
+RUN if [ ! -d vendor ]; then \
+        composer install --optimize-autoloader --no-dev; \
+    fi
+
 
 # Expõe a porta do PHP-FPM
 EXPOSE 9000

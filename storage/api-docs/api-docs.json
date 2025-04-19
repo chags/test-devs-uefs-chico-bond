@@ -19,6 +19,115 @@
         }
     ],
     "paths": {
+        "/login": {
+            "post": {
+                "tags": [
+                    "Autenticação"
+                ],
+                "summary": "Autenticar usuário e gerar token JWT",
+                "description": "Recebe as credenciais do usuário e retorna um token JWT.",
+                "operationId": "2dd578ff7aba2721293dac66833b27d1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "usuario@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "senha123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token JWT gerado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciais inválidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Credenciais inválidas."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "email": [
+                                                    "O campo email é obrigatório."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erro interno do servidor."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/posts": {
             "get": {
                 "tags": [
@@ -34,7 +143,8 @@
                         "description": "Número da página para paginação",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "default": 1
                         }
                     },
                     {
@@ -43,7 +153,8 @@
                         "description": "Quantidade de itens por página",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "default": 10
                         }
                     }
                 ],
@@ -53,18 +164,84 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Post"
-                                    }
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Post"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string"
+                                        },
+                                        "from": {
+                                            "type": "integer"
+                                        },
+                                        "last_page": {
+                                            "type": "integer"
+                                        },
+                                        "last_page_url": {
+                                            "type": "string"
+                                        },
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "per_page": {
+                                            "type": "integer"
+                                        },
+                                        "to": {
+                                            "type": "integer"
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "500": {
-                        "description": "Erro interno do servidor"
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erro interno do servidor."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -78,37 +255,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "title",
-                                    "content",
-                                    "user_id",
-                                    "tags"
-                                ],
-                                "properties": {
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Título do Post"
-                                    },
-                                    "content": {
-                                        "type": "string",
-                                        "example": "Conteúdo do post..."
-                                    },
-                                    "user_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "tags": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "example": [
-                                            "Laravel",
-                                            "API"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/StorePostRequest"
                             }
                         }
                     }
@@ -124,6 +271,22 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "422": {
                         "description": "Erro de validação",
                         "content": {
@@ -132,13 +295,13 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Os dados fornecidos são inválidos."
+                                            "example": "The given data was invalid."
                                         },
                                         "errors": {
                                             "type": "object",
                                             "example": {
-                                                "tags": [
-                                                    "A tag 'Laravel' já existe."
+                                                "title": [
+                                                    "O campo título é obrigatório."
                                                 ]
                                             }
                                         }
@@ -147,8 +310,29 @@
                                 }
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erro interno do servidor."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/posts/{id}": {
@@ -181,6 +365,22 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Post não encontrado",
                         "content": {
@@ -196,8 +396,29 @@
                                 }
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erro interno do servidor."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -222,31 +443,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "properties": {
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Novo Título"
-                                    },
-                                    "content": {
-                                        "type": "string",
-                                        "example": "Novo conteúdo do post..."
-                                    },
-                                    "user_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "tags": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "example": [
-                                            "Laravel",
-                                            "Nova Tag"
-                                        ]
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/UpdatePostRequest"
                             }
                         }
                     }
@@ -258,6 +455,22 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Post"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -277,8 +490,53 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "title": [
+                                                    "O campo título é obrigatório."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erro interno do servidor."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -302,6 +560,22 @@
                     "204": {
                         "description": "Post removido com sucesso"
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Post não encontrado",
                         "content": {
@@ -317,8 +591,29 @@
                                 }
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erro interno do servidor."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/tags": {
@@ -363,10 +658,31 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Erro interno do servidor"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -405,6 +721,22 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "422": {
                         "description": "Erro de validação",
                         "content": {
@@ -429,7 +761,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/tags/{id}": {
@@ -462,6 +799,22 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Tag não encontrada",
                         "content": {
@@ -478,7 +831,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -528,6 +886,22 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Tag não encontrada",
                         "content": {
@@ -544,7 +918,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -568,6 +947,22 @@
                     "204": {
                         "description": "Tag removida com sucesso"
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Tag não encontrada",
                         "content": {
@@ -584,7 +979,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/users": {
@@ -629,10 +1029,31 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Erro interno do servidor"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -681,6 +1102,22 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "422": {
                         "description": "Erro de validação",
                         "content": {
@@ -705,7 +1142,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/users/{id}": {
@@ -738,6 +1180,22 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Usuário não encontrado",
                         "content": {
@@ -754,7 +1212,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -809,6 +1272,22 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Usuário não encontrado",
                         "content": {
@@ -825,7 +1304,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -849,6 +1333,22 @@
                     "204": {
                         "description": "Usuário removido com sucesso"
                     },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token não fornecido ou inválido."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Usuário não encontrado",
                         "content": {
@@ -865,60 +1365,131 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         }
     },
     "components": {
         "schemas": {
-            "PostInput": {
-                "title": "PostInput",
-                "description": "Dados necessários para criar ou atualizar um post",
+            "StorePostRequest": {
+                "title": "Store Post Request Body",
+                "required": [
+                    "title",
+                    "content",
+                    "user_id"
+                ],
                 "properties": {
                     "title": {
                         "type": "string",
-                        "example": "Primeiro Post"
+                        "maxLength": 255,
+                        "example": "Meu Primeiro Post"
                     },
                     "content": {
                         "type": "string",
-                        "example": "Este é o conteúdo do primeiro post."
+                        "example": "Este é o conteúdo do meu primeiro post."
                     },
                     "user_id": {
+                        "description": "ID do usuário autor do post",
                         "type": "integer",
                         "example": 1
+                    },
+                    "tags": {
+                        "description": "Lista de nomes de tags",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "PHP",
+                            "Laravel",
+                            "API"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "UpdatePostRequest": {
+                "title": "Update Post Request Body",
+                "required": [
+                    "title",
+                    "content",
+                    "user_id"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Meu Post Atualizado"
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "Conteúdo atualizado do post."
+                    },
+                    "user_id": {
+                        "description": "ID do usuário autor do post",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tags": {
+                        "description": "Lista de nomes de tags (substitui as existentes)",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Laravel 11",
+                            "SOLID"
+                        ]
                     }
                 },
                 "type": "object"
             },
             "Post": {
-                "title": "Post",
-                "description": "Representa um post no sistema",
+                "title": "Post Model",
+                "description": "Representa um post no blog",
                 "properties": {
                     "id": {
                         "type": "integer",
+                        "readOnly": true,
                         "example": 1
-                    },
-                    "title": {
-                        "type": "string",
-                        "example": "Primeiro Post"
-                    },
-                    "content": {
-                        "type": "string",
-                        "example": "Este é o conteúdo do primeiro post."
                     },
                     "user_id": {
                         "type": "integer",
                         "example": 1
                     },
+                    "title": {
+                        "type": "string",
+                        "example": "Título do Post"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "readOnly": true,
+                        "example": "titulo-do-post"
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "Conteúdo do post..."
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
-                        "example": "2023-01-01T12:00:00Z"
+                        "readOnly": true
                     },
                     "updated_at": {
                         "type": "string",
                         "format": "date-time",
-                        "example": "2023-01-01T12:00:00Z"
+                        "readOnly": true
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Tag"
+                        }
                     }
                 },
                 "type": "object"
@@ -935,26 +1506,32 @@
                 "type": "object"
             },
             "Tag": {
-                "title": "Tag",
-                "description": "Representa uma tag no sistema",
+                "title": "Tag Model",
+                "description": "Representa uma tag associada a posts",
                 "properties": {
                     "id": {
                         "type": "integer",
+                        "readOnly": true,
                         "example": 1
                     },
                     "name": {
                         "type": "string",
-                        "example": "PHP"
+                        "example": "Laravel"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "readOnly": true,
+                        "example": "laravel"
                     },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
-                        "example": "2023-01-01T12:00:00Z"
+                        "readOnly": true
                     },
                     "updated_at": {
                         "type": "string",
                         "format": "date-time",
-                        "example": "2023-01-01T12:00:00Z"
+                        "readOnly": true
                     }
                 },
                 "type": "object"
@@ -1007,9 +1584,20 @@
                 },
                 "type": "object"
             }
+        },
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
         }
     },
     "tags": [
+        {
+            "name": "Autenticação",
+            "description": "Autenticação"
+        },
         {
             "name": "Posts",
             "description": "Posts"

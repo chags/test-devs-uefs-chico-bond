@@ -1,0 +1,10 @@
+$user = new \App\Models\User();
+$user->name = 'Test User';
+$user->email = 'usuario@example.com';
+$user->password = bcrypt('senha123');
+$user->save();
+>>> \App\Models\User::all();
+\App\Models\User::all();
+\App\Models\User::all();
+\App\Models\User::all();
+\App\Models\User::all();

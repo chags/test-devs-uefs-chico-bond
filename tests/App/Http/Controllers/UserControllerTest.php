@@ -9,8 +9,6 @@ use App\Models\User;
 class UserControllerTest extends TestCase
 {
     use RefreshDatabase; // Executa as migrações antes de cada teste
-    
-
     /**
      * Testa se a listagem de usuários retorna uma resposta bem-sucedida.
      */

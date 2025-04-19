@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse; 
+use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -17,6 +19,7 @@ class UserController extends Controller
      *     summary="Lista todos os usuários",
      *     description="Retorna uma lista paginada de todos os usuários cadastrados no sistema.",
      *     tags={"Usuários"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
@@ -37,6 +40,13 @@ class UserController extends Controller
      *         @OA\JsonContent(
      *             type="array",
      *             @OA\Items(ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
      *         )
      *     ),
      *     @OA\Response(
@@ -70,6 +80,7 @@ class UserController extends Controller
      *     summary="Exibe detalhes de um usuário específico",
      *     description="Retorna os detalhes de um usuário com base no ID fornecido.",
      *     tags={"Usuários"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -81,6 +92,13 @@ class UserController extends Controller
      *         response=200,
      *         description="Detalhes do usuário retornados com sucesso",
      *         @OA\JsonContent(ref="#/components/schemas/User")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=404,
@@ -115,6 +133,7 @@ class UserController extends Controller
      *     summary="Cria um novo usuário",
      *     description="Cria um novo usuário no sistema com os dados fornecidos.",
      *     tags={"Usuários"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -130,6 +149,13 @@ class UserController extends Controller
      *         @OA\JsonContent(ref="#/components/schemas/User")
      *     ),
      *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
+     *         )
+     *     ),
+     *     @OA\Response(
      *         response=422,
      *         description="Erro de validação",
      *         @OA\JsonContent(
@@ -142,7 +168,6 @@ class UserController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction(); // Inicia uma transação
-
         try {
             // Validação dos dados
             $validated = $request->validate([
@@ -159,7 +184,6 @@ class UserController extends Controller
             ]);
 
             Log::info('Usuário criado com sucesso.', ['user_id' => $user->id]);
-
             DB::commit(); // Confirma a transação
 
             // Retorna o usuário criado com status 201
@@ -181,6 +205,7 @@ class UserController extends Controller
      *     summary="Atualiza um usuário existente",
      *     description="Atualiza os dados de um usuário existente com base no ID fornecido.",
      *     tags={"Usuários"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -202,6 +227,13 @@ class UserController extends Controller
      *         @OA\JsonContent(ref="#/components/schemas/User")
      *     ),
      *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
+     *         )
+     *     ),
+     *     @OA\Response(
      *         response=404,
      *         description="Usuário não encontrado",
      *         @OA\JsonContent(
@@ -213,7 +245,6 @@ class UserController extends Controller
     public function update($id, Request $request)
     {
         DB::beginTransaction(); // Inicia uma transação
-
         try {
             // Busca o usuário pelo ID no banco de dados
             $user = User::findOrFail($id);
@@ -229,11 +260,9 @@ class UserController extends Controller
             if (isset($validated['password'])) {
                 $validated['password'] = Hash::make($validated['password']); // Criptografa a nova senha
             }
-
             $user->update($validated);
 
             Log::info('Usuário atualizado com sucesso.', ['user_id' => $user->id]);
-
             DB::commit(); // Confirma a transação
 
             // Retorna o usuário atualizado
@@ -258,6 +287,7 @@ class UserController extends Controller
      *     summary="Remove um usuário",
      *     description="Remove um usuário existente com base no ID fornecido.",
      *     tags={"Usuários"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -268,6 +298,13 @@ class UserController extends Controller
      *     @OA\Response(
      *         response=204,
      *         description="Usuário removido com sucesso"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Não autorizado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Token não fornecido ou inválido.")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=404,
@@ -298,4 +335,5 @@ class UserController extends Controller
             return response()->json(['error' => 'Erro interno do servidor'], 500);
         }
     }
-}
+
+}   

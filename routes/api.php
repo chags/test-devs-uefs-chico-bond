@@ -5,7 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\AuthController;
 
+// Aplica o middleware de autenticação JWT a todas as rotas
+Route::middleware('auth:api')->group(function () {
 
     // Rotas para Usuários
     Route::get('/users', [UserController::class, 'index']);
@@ -27,5 +30,10 @@ use App\Http\Controllers\TagController;
     Route::post('/tags', [TagController::class, 'store']);
     Route::put('/tags/{id}', [TagController::class, 'update']);
     Route::delete('/tags/{id}', [TagController::class, 'destroy']);
+});
+
+// Rotas Públicas (Exemplo: Login e Registro)
+Route::post('/login', [AuthController::class, 'login']); // Rota para autenticação
+
 
 

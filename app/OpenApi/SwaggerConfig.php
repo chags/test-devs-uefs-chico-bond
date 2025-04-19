@@ -23,4 +23,4 @@ use OpenApi\Annotations as OA;
  *     description="Ambiente de Desenvolvimento"
  * )
  */
-class SwaggerDocumentation {}
+class SwaggerConfig {}
