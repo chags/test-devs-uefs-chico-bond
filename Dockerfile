@@ -7,11 +7,13 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     PSYSH_CONFIG_DIR=/var/www/html/.config/psysh
 
 # 1) Instala deps de SO
+# Instala dependências do sistema operacional
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip \
     sqlite3 libsqlite3-dev libzip-dev bash \
     default-mysql-client \
     netcat-openbsd \
+    procps \ 
   && docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring \
      bcmath exif pcntl gd zip \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -24,6 +26,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
      | php -- --install-dir=/usr/local/bin --filename=composer
 
 WORKDIR /var/www/html
+
+RUN chown -R www-data:www-data storage bootstrap/cache
 
 # 3) Copia o entrypoint primeiro
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
