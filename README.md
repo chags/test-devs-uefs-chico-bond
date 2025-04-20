@@ -90,13 +90,6 @@ Certifique-se de ter instalado na sua máquina:
    - Configure o token no Swagger clicando no botão **Authorize** e inserindo o token no formato `Bearer <token>`.  
 
 ---
-
-Entendido! Vamos adicionar uma seção clara no `README.md` explicando como executar os testes unitários e de integração, além de fornecer os comandos necessários. Também incluiremos informações sobre as ferramentas utilizadas (como PHPUnit) e qualquer configuração prévia necessária.
-
-Aqui está a seção atualizada para o `README.md`:
-
----
-
 ## **Como Executar os Testes**
 
 Os testes foram implementados usando [PHPUnit](https://phpunit.de/), uma ferramenta amplamente utilizada para testes unitários e de integração em projetos PHP. Os testes garantem que o código funcione conforme o esperado e ajudam a prevenir regressões durante o desenvolvimento.
@@ -138,10 +131,7 @@ Os testes estão organizados no diretório `tests/App/Http/Controllers`:
 1. **Testes Unitarios e de integração**:
    - Localizado em  `tests/App/Http/Controllers`.
    - Os dois estão junto. para facilitar a avaliação ao executar o `php artisan test` estará fazendo os dois tipos
-   ao mesmo tempo , isso garante que todaa plaicação ira funcionar num conteste geral.
-
- Aqui está um **texto resumido** para você incluir no `README.md`, destacando as otimizações de banco de dados que foram realmente implementadas no projeto. Este texto é conciso, direto e fácil de entender:
-
+   ao mesmo tempo , isso garante que toda a aplicação ira funcionar num contexto geral.
 ---
 
 ### **Otimizações de Banco de Dados**
@@ -178,11 +168,11 @@ Essas práticas garantem que o sistema seja rápido, sustentável e preparado pa
 
 7. **Testes**: teste unitarios e de integração Juntos, esses testes garantem que o sistema seja robusto, confiável e fácil de manter.
 
-8. **Otmizações de Banco de dados**: teste unitarios e de integração Juntos, esses testes garantem que o sistema seja robusto, confiável e fácil de manter.
+8. **Otmizações de Banco de dados**: Essas otimizações resultaram em um sistema mais rápido, eficiente e preparado para lidar com grandes volumes de dados, garantindo uma experiência fluida tanto para os usuários quanto para os desenvolvedores..
 
 9. **Usou IA?**: Claro que sim, eu não seria ótario de não contar com essa ajuda. Tarefas repetitivas nunca mais, kkk!
 
-10. **REDIS ou ElastcSeach**: Ta maluco o projeto fica muito caro e o tempo não permite, 5 dias é muito bom, mas sabe 
+10. **REDIS ou ElastcSeach**: Ta maluco o projeto fica muito caro e o tempo não permite, 5 dias é muito bom, mas sabe? 
 aqui tem uns comedor de rapadura que não pergunta de onde eu consigo dinheiro para comprar a cana. logo não tenho tempo.
 talvez quando você me contratar eu corro com muitas outras coisas. kkkk!
 
@@ -206,4 +196,6 @@ talvez quando você me contratar eu corro com muitas outras coisas. kkkk!
   ```bash
   docker-compose down -v && docker-compose up --build
   ```
+
+  ###Atenciosamente: Cristiano chagas
 
