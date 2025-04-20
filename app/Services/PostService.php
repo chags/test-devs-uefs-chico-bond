@@ -6,9 +6,10 @@ use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth; // Importação necessária para Auth::id()
 use Illuminate\Support\Str;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Throwable; // Use Throwable para pegar Exceptions e Errors
+use Throwable;
 
 class PostService
 {
@@ -21,8 +22,6 @@ class PostService
      */
     public function listPosts(int $page = 1, int $perPage = 10): LengthAwarePaginator
     {
-        // Adicione eager loading se as tags forem frequentemente necessárias na listagem
-        // return Post::with('tags')->paginate($perPage, ['*'], 'page', $page);
         return Post::paginate($perPage, ['*'], 'page', $page);
     }
 
@@ -36,15 +35,13 @@ class PostService
      */
     public function getPostById(int $id): Post
     {
-        // Adicione eager loading das tags se necessário
-        // return Post::with('tags')->findOrFail($id);
         return Post::findOrFail($id);
     }
 
     /**
      * Cria um novo post com suas tags.
      *
-     * @param array $data Dados validados do post (title, content, user_id, ?tags)
+     * @param array $data Dados validados do post (title, content, ?tags)
      * @return Post
      * @throws \Exception|\Throwable Em caso de erro na criação ou transação.
      */
@@ -52,6 +49,12 @@ class PostService
     {
         DB::beginTransaction();
         try {
+            // Remove o user_id enviado na requisição (se houver)
+            unset($data['user_id']);
+
+            // Adiciona automaticamente o ID do usuário autenticado
+            $data['user_id'] = Auth::id();
+
             // Gera o slug automaticamente
             $data['slug'] = Str::slug($data['title']);
 
@@ -70,13 +73,12 @@ class PostService
             // Carrega as tags para retornar o objeto completo
             return $post->load('tags');
 
-        } catch (Throwable $e) { // Captura Throwable para pegar mais tipos de erros
+        } catch (Throwable $e) {
             DB::rollBack();
             Log::error('Erro ao criar post no serviço: ' . $e->getMessage(), [
-                'data' => $data, // Cuidado ao logar dados sensíveis
+                'data' => $data,
                 'trace' => $e->getTraceAsString(),
             ]);
-            // Re-lança a exceção para ser tratada pelo controller ou handler global
             throw $e;
         }
     }
@@ -94,42 +96,43 @@ class PostService
     {
         DB::beginTransaction();
         try {
-            $post = $this->getPostById($id); // Reutiliza o método para buscar e já trata o 404 se não achar
-
+            $post = $this->getPostById($id);
+    
+            // Verifica se o usuário autenticado é o proprietário do post
+            if ($post->user_id !== Auth::id()) {
+                throw new \Exception("Você não tem permissão para atualizar este post.");
+            }
+    
+            // Remove o user_id enviado na requisição (se houver)
+            unset($data['user_id']);
+    
             // Atualiza o slug se o título foi alterado
             if (isset($data['title']) && $data['title'] !== $post->title) {
                 $data['slug'] = Str::slug($data['title']);
                 Log::info('Slug do post será atualizado.', ['post_id' => $id, 'new_slug' => $data['slug']]);
             }
-
-            // Atualiza os dados do post
+    
+            // Atualiza apenas os campos enviados na requisição
             $post->update($data);
             Log::info('Dados do post atualizados.', ['post_id' => $id]);
-
-
+    
             // Processa e sincroniza as tags, se fornecidas
-            // Se 'tags' não estiver presente no $data, mantém as tags existentes.
-            // Se 'tags' for um array vazio [], remove todas as tags.
-            if (array_key_exists('tags', $data)) { // Verifica se a chave existe, mesmo que seja null ou []
-                 $tagIds = $this->processTags($data['tags'] ?? []); // Usa array vazio se tags for null
-                 $post->tags()->sync($tagIds); // sync lida com adicionar/remover
-                 Log::info('Tags do post sincronizadas.', ['post_id' => $post->id, 'tag_ids' => $tagIds]);
+            if (array_key_exists('tags', $data)) {
+                $tagIds = $this->processTags($data['tags'] ?? []);
+                $post->tags()->sync($tagIds);
+                Log::info('Tags do post sincronizadas.', ['post_id' => $post->id, 'tag_ids' => $tagIds]);
             }
-
-
+    
             DB::commit();
-            // Carrega as tags para retornar o objeto completo
             return $post->load('tags');
-
+    
         } catch (Throwable $e) {
             DB::rollBack();
-             Log::error('Erro ao atualizar post no serviço: ' . $e->getMessage(), [
+            Log::error('Erro ao atualizar post no serviço: ' . $e->getMessage(), [
                 'post_id' => $id,
-                'data' => $data, // Cuidado ao logar dados sensíveis
+                'data' => $data,
                 'trace' => $e->getTraceAsString(),
             ]);
-            // Re-lança a exceção para ser tratada pelo controller ou handler global
-            // ModelNotFoundException já será lançada por getPostById se necessário
             throw $e;
         }
     }
@@ -144,25 +147,28 @@ class PostService
      */
     public function deletePost(int $id): bool
     {
+        DB::beginTransaction();
         try {
-            $post = $this->getPostById($id); // Reutiliza o método para buscar
-            // A relação com tags (pivot table) deve ser configurada com onDelete('cascade')
-            // ou você pode desanexar manualmente antes: $post->tags()->detach();
-            $deleted = $post->delete();
-             if ($deleted) {
-                Log::info('Post deletado com sucesso.', ['post_id' => $id]);
-            } else {
-                 Log::warning('Falha ao deletar post (método delete retornou false).', ['post_id' => $id]);
+            // Busca o post pelo ID
+            $post = $this->getPostById($id);
+    
+            // Verifica se o usuário autenticado é o proprietário do post
+            if ($post->user_id !== Auth::id()) {
+                throw new \Exception("Você não tem permissão para excluir este post.");
             }
-            return $deleted;
-
+    
+            // Remove o post
+            $post->delete();
+    
+            DB::commit();
+            return true;
         } catch (Throwable $e) {
-             Log::error('Erro ao deletar post no serviço: ' . $e->getMessage(), [
+            DB::rollBack();
+            Log::error('Erro ao excluir post no serviço: ' . $e->getMessage(), [
                 'post_id' => $id,
                 'trace' => $e->getTraceAsString(),
             ]);
-             // Re-lança a exceção
-             throw $e;
+            throw $e;
         }
     }
 
@@ -175,7 +181,7 @@ class PostService
      */
     protected function processTags(array $tagNames): array
     {
-         if (empty($tagNames)) {
+        if (empty($tagNames)) {
             return [];
         }
 
@@ -183,17 +189,10 @@ class PostService
             if (empty(trim($tagName))) return null; // Ignora tags vazias
 
             $tagSlug = Str::slug($tagName);
-            // firstOrCreate para evitar race conditions (embora não 100% garantido sem lock)
             $tag = Tag::firstOrCreate(
-                ['slug' => $tagSlug], // Busca pelo slug para garantir unicidade baseada nele
-                ['name' => trim($tagName)]  // Cria com nome e slug se não encontrar pelo slug
+                ['slug' => $tagSlug],
+                ['name' => trim($tagName)]
             );
-             // Se encontrou pelo slug mas o nome é diferente (caso raro, mas possível), atualiza o nome?
-             // Decision: Manter o nome original encontrado pelo slug. Ou pode adicionar lógica para atualizar.
-             // if ($tag->name !== trim($tagName)) {
-             //     Log::info('Tag encontrada pelo slug, mas nome difere.', ['slug' => $tagSlug, 'found_name' => $tag->name, 'requested_name' => trim($tagName)]);
-             //     // Opcional: $tag->update(['name' => trim($tagName)]);
-             // }
             return $tag->id;
         })->filter()->unique()->toArray(); // filter para remover nulls, unique e toArray
     }

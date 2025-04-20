@@ -29,7 +29,6 @@ class StorePostRequest extends FormRequest
         return [
             'title'   => 'required|string|max:255',
             'content' => 'required|string',
-            'user_id' => 'required|integer|exists:users,id', // Considere obter o user_id do usuário autenticado
             'tags'    => 'sometimes|array',
             'tags.*'  => 'sometimes|string|max:255',
         ];
@@ -45,8 +44,6 @@ class StorePostRequest extends FormRequest
         return [
             'title.required' => 'O campo título é obrigatório.',
             'content.required' => 'O campo conteúdo é obrigatório.',
-            'user_id.required' => 'O ID do usuário é obrigatório.',
-            'user_id.exists' => 'O usuário especificado não existe.',
             'tags.array' => 'As tags devem ser um array.',
             'tags.*.string' => 'Cada tag deve ser um texto.',
             // Adicione outras mensagens personalizadas se necessário

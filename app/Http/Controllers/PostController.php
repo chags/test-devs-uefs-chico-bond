@@ -8,9 +8,9 @@ use App\Services\PostService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Validation\ValidationException;
 use OpenApi\Annotations as OA;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class PostController extends Controller
 {
@@ -142,7 +142,12 @@ class PostController extends Controller
      *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/StorePostRequest")
+     *         @OA\JsonContent(
+     *             required={"title", "content"},
+     *             @OA\Property(property="title", type="string", example="Meu Primeiro Post"),
+     *             @OA\Property(property="content", type="string", example="Este é o conteúdo do meu primeiro post."),
+     *             @OA\Property(property="tags", type="array", @OA\Items(type="string"), example={"PHP", "Laravel", "API"})
+     *         )
      *     ),
      *     @OA\Response(
      *         response=201,
@@ -172,11 +177,10 @@ class PostController extends Controller
     public function store(StorePostRequest $request): JsonResponse
     {
         try {
+            // Os dados validados não incluem user_id, pois ele será preenchido automaticamente no serviço
             $validatedData = $request->validated();
             $post = $this->postService->createPost($validatedData);
             return response()->json($post, 201);
-        } catch (ValidationException $e) {
-            return response()->json(['message' => 'Os dados fornecidos são inválidos.', 'errors' => $e->errors()], 422);
         } catch (\Throwable $e) {
             Log::error('Erro inesperado no PostController@store: ' . $e->getMessage());
             return response()->json(['message' => 'Erro interno ao criar post.'], 500);
@@ -199,7 +203,11 @@ class PostController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/UpdatePostRequest")
+     *         @OA\JsonContent(
+     *             @OA\Property(property="title", type="string", example="Título Atualizado"),
+     *             @OA\Property(property="content", type="string", example="Conteúdo atualizado do post."),
+     *             @OA\Property(property="tags", type="array", @OA\Items(type="string"), example={"Laravel 11", "SOLID"})
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -235,18 +243,20 @@ class PostController extends Controller
     {
         try {
             $validatedData = $request->validated();
+            Log::info('Dados validados para atualização:', $validatedData); // Log para depuração
             $post = $this->postService->updatePost($id, $validatedData);
             return response()->json($post);
         } catch (ModelNotFoundException $e) {
+            Log::error('Post não encontrado durante a atualização.', ['post_id' => $id]);
             return response()->json(['message' => 'Post não encontrado.'], 404);
         } catch (ValidationException $e) {
+            Log::error('Erro de validação durante a atualização.', ['errors' => $e->errors()]);
             return response()->json(['message' => 'Os dados fornecidos são inválidos.', 'errors' => $e->errors()], 422);
         } catch (\Throwable $e) {
             Log::error('Erro inesperado no PostController@update: ' . $e->getMessage(), ['post_id' => $id]);
             return response()->json(['message' => 'Erro interno ao atualizar post.'], 500);
         }
     }
-
     /**
      * @OA\Delete(
      *     path="/posts/{id}",

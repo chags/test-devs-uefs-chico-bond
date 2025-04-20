@@ -40,11 +40,11 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "usuario@example.com"
+                                        "example": "professor@uefs.gov.br"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "example": "senha123"
+                                        "example": "admin123"
                                     }
                                 },
                                 "type": "object"
@@ -78,30 +78,6 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Credenciais inválidas."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Erro de validação",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "email": [
-                                                    "O campo email é obrigatório."
-                                                ]
-                                            }
                                         }
                                     },
                                     "type": "object"
@@ -255,7 +231,32 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/StorePostRequest"
+                                "required": [
+                                    "title",
+                                    "content"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Meu Primeiro Post"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Este é o conteúdo do meu primeiro post."
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "PHP",
+                                            "Laravel",
+                                            "API"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -443,7 +444,27 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UpdatePostRequest"
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Título Atualizado"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Conteúdo atualizado do post."
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "Laravel 11",
+                                            "SOLID"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }

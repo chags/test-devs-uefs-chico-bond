@@ -7,59 +7,22 @@
                     UEFS
                 </a>
             </div>
-            <div class="flex-1">
-                <p class="text-gray-500 uppercase md:mb-6">Links</p>
-                <ul class="mb-6 list-reset">
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">FAQ</a>
-                    </li>
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Help</a>
-                    </li>
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Support</a>
-                    </li>
-                </ul>
-            </div>
-            <div class="flex-1">
-                <p class="text-gray-500 uppercase md:mb-6">Legal</p>
-                <ul class="mb-6 list-reset">
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Terms</a>
-                    </li>
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Privacy</a>
-                    </li>
-                </ul>
-            </div>
-            <div class="flex-1">
-                <p class="text-gray-500 uppercase md:mb-6">Social</p>
-                <ul class="mb-6 list-reset">
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Facebook</a>
-                    </li>
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Linkedin</a>
-                    </li>
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Twitter</a>
-                    </li>
-                </ul>
-            </div>
-            <div class="flex-1">
-                <p class="text-gray-500 uppercase md:mb-6">Company</p>
-                <ul class="mb-6 list-reset">
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Official Blog</a>
-                    </li>
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">About Us</a>
-                    </li>
-                    <li class="inline-block mt-2 mr-2 md:block md:mr-0">
-                        <a href="#" class="text-gray-800 no-underline hover:underline hover:text-orange-500">Contact</a>
-                    </li>
-                </ul>
-            </div>
+        <div class="z-20 flex-grow hidden w-full p-4 mt-2 text-black bg-white lg:flex lg:items-center lg:w-auto lg:block lg:mt-0 lg:bg-transparent lg:p-0"
+            id="nav-content">
+            <ul class="items-center justify-end flex-1 list-reset lg:flex">
+                <li class="mr-3">
+                    <a class="inline-block px-4 py-2 font-bold text-black no-underline" href="#">Home</a>
+                </li>
+                <li class="mr-3">
+                    <a class="inline-block px-4 py-2 text-black no-underline hover:text-gray-800 hover:text-underline"
+                        href="#posts">Posts</a>
+                </li>             
+            </ul>
+            <a id="navAction" href="{{ url('/api/documentation') }}" target="_blank"
+                class="px-8 py-4 mx-auto mt-4 font-bold text-gray-800 bg-white rounded-full shadow opacity-75 lg:mx-0 hover:underline lg:mt-0">
+                API SWAGGER
+            </a>
+        </div>
         </div>
     </div>
     <a href="https://www.freepik.com/free-photos-vectors/background">Background vector created by freepik - www.freepik.com</a>

@@ -8,3 +8,5 @@ $user->save();
 \App\Models\User::all();
 \App\Models\User::all();
 \App\Models\User::all();
+App\Models\User::all();
+App\Models\User::all();

@@ -23,7 +23,7 @@
                 <li class="mr-3">
                     <a class="inline-block px-4 py-2 text-black no-underline hover:text-gray-800 hover:text-underline"
                         href="#posts">Posts</a>
-                </li>
+                </li>              
             </ul>
             <a id="navAction" href="{{ url('/api/documentation') }}" target="_blank"
                 class="px-8 py-4 mx-auto mt-4 font-bold text-gray-800 bg-white rounded-full shadow opacity-75 lg:mx-0 hover:underline lg:mt-0">

@@ -1,24 +1,38 @@
 <?php
 
-namespace Test\App\Http\Controllers;
+namespace Tests\App\Http\Controllers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Post;
-use App\Models\Tag;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PostControllerTest extends TestCase
 {
     use RefreshDatabase; // Limpa o banco de dados após cada teste
 
     /**
+     * Autentica um usuário e configura o token JWT.
+     */
+    protected function authenticate()
+    {
+        // Cria um usuário falso e autentica-o
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+        $this->withHeader('Authorization', "Bearer {$token}");
+        Auth::setUser($user); // Define o usuário autenticado no contexto do teste
+    }
+
+    /**
      * Testa a listagem de posts.
      */
     public function test_index_returns_paginated_posts()
     {
-        
+        $this->authenticate();
+
         // Cria alguns posts no banco de dados
         Post::factory()->count(3)->create();
 
@@ -37,6 +51,8 @@ class PostControllerTest extends TestCase
      */
     public function test_show_returns_post_details()
     {
+        $this->authenticate();
+
         // Cria um post no banco de dados
         $post = Post::factory()->create();
 
@@ -59,14 +75,12 @@ class PostControllerTest extends TestCase
      */
     public function test_store_creates_a_new_post()
     {
-        // Cria um usuário no banco de dados
-        $user = User::factory()->create();
+        $this->authenticate();
 
         // Dados para criar um novo post
         $postData = [
             'title' => 'Novo Post',
             'content' => 'Conteúdo do novo post...',
-            'user_id' => $user->id,
             'tags' => ['Laravel', 'API'],
         ];
 
@@ -80,7 +94,6 @@ class PostControllerTest extends TestCase
         $this->assertDatabaseHas('posts', [
             'title' => 'Novo Post',
             'content' => 'Conteúdo do novo post...',
-            'user_id' => $user->id,
         ]);
 
         // Verifica se as tags foram associadas ao post
@@ -93,18 +106,19 @@ class PostControllerTest extends TestCase
      */
     public function test_update_updates_an_existing_post()
     {
-        // Cria um post no banco de dados
-        $post = Post::factory()->create();
+        $this->authenticate();
     
-        // Dados para atualizar o post, agora incluindo o campo user_id
+        // Cria um post no banco de dados associado ao usuário autenticado
+        $post = Post::factory()->create(['user_id' => Auth::id()]);
+    
+        // Dados para atualizar o post
         $updatedData = [
-            'title'   => 'Título Atualizado',
+            'title' => 'Título Atualizado',
             'content' => 'Conteúdo atualizado...',
-            'user_id' => $post->user_id, // Inclua o user_id para satisfazer a validação
-            'tags'    => ['Nova Tag'],
+            'tags' => ['Nova Tag'],
         ];
     
-        // Faz a requisição PUT para o endpoint /api/posts/{id}
+        // Faz a requisição PUT para o endpoint /posts/{id}
         $response = $this->putJson("/api/posts/{$post->id}", $updatedData);
     
         // Verifica se a resposta tem status 200
@@ -112,30 +126,31 @@ class PostControllerTest extends TestCase
     
         // Verifica se o post foi atualizado no banco de dados
         $this->assertDatabaseHas('posts', [
-            'id'      => $post->id,
-            'title'   => 'Título Atualizado',
+            'id' => $post->id,
+            'title' => 'Título Atualizado',
             'content' => 'Conteúdo atualizado...',
         ]);
     
         // Verifica se as tags foram atualizadas
         $response->assertJsonFragment(['name' => 'Nova Tag']);
     }
-    
 
     /**
      * Testa a exclusão de um post.
      */
     public function test_destroy_deletes_a_post()
     {
-        // Cria um post no banco de dados
-        $post = Post::factory()->create();
-
+        $this->authenticate();
+    
+        // Cria um post no banco de dados associado ao usuário autenticado
+        $post = Post::factory()->create(['user_id' => Auth::id()]);
+    
         // Faz a requisição DELETE para o endpoint /posts/{id}
         $response = $this->deleteJson("/api/posts/{$post->id}");
-
+    
         // Verifica se a resposta tem status 204
         $response->assertStatus(204);
-
+    
         // Verifica se o post foi removido do banco de dados
         $this->assertDatabaseMissing('posts', ['id' => $post->id]);
     }
@@ -145,6 +160,8 @@ class PostControllerTest extends TestCase
      */
     public function test_store_validates_required_fields()
     {
+        $this->authenticate();
+
         // Dados inválidos (faltando campos obrigatórios)
         $invalidData = [];
 
@@ -155,7 +172,7 @@ class PostControllerTest extends TestCase
         $response->assertStatus(422);
 
         // Verifica se os erros de validação estão presentes
-        $response->assertJsonValidationErrors(['title', 'content', 'user_id', 'tags']);
+        $response->assertJsonValidationErrors(['title', 'content']);
     }
 
     /**
@@ -163,19 +180,21 @@ class PostControllerTest extends TestCase
      */
     public function test_update_validates_required_fields()
     {
+        $this->authenticate();
+    
         // Cria um post no banco de dados
         $post = Post::factory()->create();
-
+    
         // Dados inválidos (faltando campos obrigatórios)
         $invalidData = [];
-
+    
         // Faz a requisição PUT para o endpoint /posts/{id}
         $response = $this->putJson("/api/posts/{$post->id}", $invalidData);
-
+    
         // Verifica se a resposta tem status 422
         $response->assertStatus(422);
-
+    
         // Verifica se os erros de validação estão presentes
-        $response->assertJsonValidationErrors(['title', 'content', 'user_id']);
+        $response->assertJsonValidationErrors(['title', 'content']);
     }
 }

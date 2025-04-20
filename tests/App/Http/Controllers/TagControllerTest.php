@@ -1,20 +1,35 @@
 <?php
 
-namespace Test\App\Http\Controllers;
+namespace Tests\App\Http\Controllers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Tag;
+use App\Models\User;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TagControllerTest extends TestCase
 {
     use RefreshDatabase; // Executa as migrações antes de cada teste
 
     /**
+     * Autentica um usuário e configura o token JWT.
+     */
+    protected function authenticate()
+    {
+        // Cria um usuário falso e autentica-o
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+        $this->withHeader('Authorization', "Bearer {$token}");
+    }
+
+    /**
      * Testa se a listagem de tags retorna uma resposta bem-sucedida.
      */
     public function test_index_returns_tags()
     {
+        $this->authenticate();
+
         // Cria algumas tags no banco de dados
         Tag::factory()->count(3)->create();
 
@@ -33,6 +48,8 @@ class TagControllerTest extends TestCase
      */
     public function test_store_creates_a_new_tag()
     {
+        $this->authenticate();
+
         // Dados válidos para criar uma nova tag
         $data = [
             'name' => 'Nova Tag',
@@ -53,6 +70,8 @@ class TagControllerTest extends TestCase
      */
     public function test_store_validates_required_fields()
     {
+        $this->authenticate();
+
         // Dados inválidos (faltando o campo "name")
         $invalidData = [];
 
@@ -71,6 +90,8 @@ class TagControllerTest extends TestCase
      */
     public function test_update_updates_an_existing_tag()
     {
+        $this->authenticate();
+
         // Cria uma tag no banco de dados
         $tag = Tag::factory()->create(['name' => 'Tag Original']);
 
@@ -94,6 +115,8 @@ class TagControllerTest extends TestCase
      */
     public function test_destroy_deletes_a_tag()
     {
+        $this->authenticate();
+
         // Cria uma tag no banco de dados
         $tag = Tag::factory()->create();
 

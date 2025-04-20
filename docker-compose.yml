@@ -1,5 +1,4 @@
 services:
-  # Serviço PHP
   php:
     build:
       context: .
@@ -7,12 +6,12 @@ services:
     container_name: laravel
     volumes:
       - .:/var/www/html
-      - psysh_config:/var/www/.config/psysh 
-    user: "1000:1000"
+      - /var/www/html/vendor
+      - psysh_config:/var/www/.config/psysh
     networks:
       - laravel_network
+    restart: unless-stopped  # Adiciona restart automático
 
-  # Serviço MySQL (Desenvolvimento)
   mysql:
     image: mysql:8.0
     container_name: laravel_mysql
@@ -25,8 +24,15 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - laravel_network
+    restart: unless-stopped  # Adiciona restart automático
+    command: --default-authentication-plugin=mysql_native_password  # Garante compatibilidade
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
-  # Serviço Nginx
   nginx:
     image: nginx:alpine
     container_name: laravel_nginx
@@ -34,16 +40,18 @@ services:
       - "8000:80"
     volumes:
       - .:/var/www/html
+      - /var/www/html/vendor
       - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php
     networks:
       - laravel_network
+    restart: unless-stopped  # Adiciona restart automático
 
 volumes:
   mysql_data:
   mysql_test_data:
-  psysh_config: 
+  psysh_config:
 
 networks:
   laravel_network:

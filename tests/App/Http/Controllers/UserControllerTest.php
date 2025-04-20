@@ -1,38 +1,54 @@
 <?php
 
-namespace Test\App\Http\Controllers;
+namespace Tests\App\Http\Controllers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserControllerTest extends TestCase
 {
     use RefreshDatabase; // Executa as migrações antes de cada teste
+
+    /**
+     * Autentica um usuário e configura o token JWT.
+     */
+    protected function authenticate()
+    {
+        // Cria um usuário falso e autentica-o
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+        $this->withHeader('Authorization', "Bearer {$token}");
+    }
+
     /**
      * Testa se a listagem de usuários retorna uma resposta bem-sucedida.
      */
     public function test_index_returns_users()
     {
-
+        // Autentica o usuário
+        $this->authenticate();
+    
         // Cria alguns usuários no banco de dados
         User::factory()->count(3)->create();
-
+    
         // Faz a requisição GET para o endpoint /users
         $response = $this->getJson('/api/users');
-
+    
         // Verifica se a resposta tem status 200
         $response->assertStatus(200);
-
-        // Verifica se a resposta contém os usuários criados
-        $response->assertJsonCount(3, 'data');
+    
+        // Verifica se a resposta contém os usuários criados (excluindo o usuário autenticado)
+        $response->assertJsonCount(4, 'data'); // Total de 4 usuários: 3 criados + 1 autenticado
     }
-
     /**
      * Testa se a criação de um novo usuário funciona corretamente.
      */
     public function test_store_creates_a_new_user()
     {
+        $this->authenticate();
+
         // Dados válidos para criar um novo usuário
         $data = [
             'name' => 'Novo Usuário',
@@ -55,6 +71,8 @@ class UserControllerTest extends TestCase
      */
     public function test_store_validates_required_fields()
     {
+        $this->authenticate();
+
         // Dados inválidos (faltando campos obrigatórios)
         $invalidData = [];
 
@@ -73,6 +91,8 @@ class UserControllerTest extends TestCase
      */
     public function test_update_updates_an_existing_user()
     {
+        $this->authenticate();
+
         // Cria um usuário no banco de dados
         $user = User::factory()->create([
             'name' => 'Nome Original',
@@ -104,6 +124,8 @@ class UserControllerTest extends TestCase
      */
     public function test_destroy_deletes_a_user()
     {
+        $this->authenticate();
+
         // Cria um usuário no banco de dados
         $user = User::factory()->create();
 

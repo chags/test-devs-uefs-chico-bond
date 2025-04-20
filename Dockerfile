@@ -1,57 +1,44 @@
-# Imagem oficial do PHP 8.4 com FPM
 FROM php:8.4-fpm
 
-# Variáveis de ambiente
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
-    APP_ENV=production \
+    APP_ENV=local \
     HOME=/var/www/html \
     XDG_CONFIG_HOME=/var/www/html/.config \
     PSYSH_CONFIG_DIR=/var/www/html/.config/psysh
 
-# Instala dependências do sistema
+# 1) Instala deps de SO
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    sqlite3 \
-    libsqlite3-dev \
-    libzip-dev \
-    && docker-php-ext-install \
-        pdo \
-        pdo_mysql \
-        pdo_sqlite \
-        mbstring \
-        bcmath \
-        exif \
-        pcntl \
-        gd \
-        zip
+    git curl libpng-dev libonig-dev libxml2-dev zip unzip \
+    sqlite3 libsqlite3-dev libzip-dev bash \
+    default-mysql-client \
+    netcat-openbsd \
+  && docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring \
+     bcmath exif pcntl gd zip \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Cria diretórios com permissões corretas
-RUN mkdir -p /var/www/html/storage/framework/{sessions,views,cache} \
-    && mkdir -p /var/www/html/bootstrap/cache \
-    && mkdir -p $XDG_CONFIG_HOME/psysh \
-    && chown -R www-data:www-data /var/www/html $XDG_CONFIG_HOME
+# 2) Node & Composer
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get install -y nodejs \
+  && npm install -g npm@latest \
+  && curl -sS https://getcomposer.org/installer \
+     | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Define o diretório de trabalho
 WORKDIR /var/www/html
 
-# Copia o código do Laravel para dentro do container
+# 3) Copia o entrypoint primeiro
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# 4) Copia o resto do código
 COPY . .
 
+# 5) Instala dependências
+RUN composer install --no-scripts \
+    && composer dump-autoload --optimize
 
-# Instala dependências do Laravel (modo produção) apenas se 'vendor' não existir
-RUN if [ ! -d vendor ]; then \
-        composer install --optimize-autoloader --no-dev; \
-    fi
+# 6) Garante que os dirs existam e ajusta permissão
+RUN mkdir -p storage/framework/{sessions,views,cache} bootstrap/cache \
+    && chmod -R 777 storage bootstrap/cache
 
-
-# Expõe a porta do PHP-FPM
-EXPOSE 9000
-
-# Comando padrão
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
