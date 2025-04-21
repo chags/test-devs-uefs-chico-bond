@@ -6,11 +6,11 @@
 5 silly config load:file:/usr/etc/npmrc
 6 verbose title npm install
 7 verbose argv "install" "--loglevel" "silent"
-8 verbose logfile logs-max:10 dir:/var/www/html/.npm/_logs/2025-04-20T13_57_59_941Z-
-9 verbose logfile /var/www/html/.npm/_logs/2025-04-20T13_57_59_941Z-debug-0.log
+8 verbose logfile logs-max:10 dir:/var/www/html/.npm/_logs/2025-04-21T00_08_32_266Z-
+9 verbose logfile /var/www/html/.npm/_logs/2025-04-21T00_08_32_266Z-debug-0.log
 10 silly logfile start cleaning logs, removing 1 files
-11 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
-12 silly logfile done cleaning log files
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
 13 silly idealTree buildDeps
 14 silly reify moves {}
 15 silly audit bulk request {
@@ -247,7 +247,7 @@
 15 silly audit   yargs: [ '17.7.2' ],
 15 silly audit   'yargs-parser': [ '21.1.1' ]
 15 silly audit }
-16 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 438ms
+16 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 540ms
 17 silly audit report {}
 18 verbose cwd /var/www/html
 19 verbose os Linux 5.15.167.4-microsoft-standard-WSL2

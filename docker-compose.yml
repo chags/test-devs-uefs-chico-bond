@@ -3,11 +3,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        USER_ID: 1000
+        GROUP_ID: 1000
     container_name: laravel
     volumes:
       - .:/var/www/html
       - /var/www/html/vendor
       - psysh_config:/var/www/.config/psysh
+    user: "1000:1000"
     networks:
       - laravel_network
     restart: unless-stopped 

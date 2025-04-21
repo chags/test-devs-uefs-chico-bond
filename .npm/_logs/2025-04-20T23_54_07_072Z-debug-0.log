@@ -6,8 +6,8 @@
 5 silly config load:file:/usr/etc/npmrc
 6 verbose title npm install
 7 verbose argv "install" "--loglevel" "silent"
-8 verbose logfile logs-max:10 dir:/var/www/html/.npm/_logs/2025-04-20T22_23_34_605Z-
-9 verbose logfile /var/www/html/.npm/_logs/2025-04-20T22_23_34_605Z-debug-0.log
+8 verbose logfile logs-max:10 dir:/var/www/html/.npm/_logs/2025-04-20T23_54_07_072Z-
+9 verbose logfile /var/www/html/.npm/_logs/2025-04-20T23_54_07_072Z-debug-0.log
 10 silly logfile start cleaning logs, removing 1 files
 11 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
 12 silly logfile done cleaning log files
@@ -370,7 +370,7 @@
 136 silly reify mark deleted [ '/var/www/html/node_modules/@esbuild/android-arm' ]
 137 verbose reify failed optional dependency /var/www/html/node_modules/@esbuild/aix-ppc64
 138 silly reify mark deleted [ '/var/www/html/node_modules/@esbuild/aix-ppc64' ]
-139 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 412ms
+139 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 576ms
 140 silly audit report {}
 141 verbose cwd /var/www/html
 142 verbose os Linux 5.15.167.4-microsoft-standard-WSL2
